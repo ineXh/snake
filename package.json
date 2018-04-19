@@ -1,0 +1,21 @@
+{
+  "name": "snake",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start":  "node index.js",
+    "dev": "webpack -d --watch",
+    "devbuild": "webpack",
+    "build": "webpack --config ./webpack.production.config.js",
+    "server8000": "python -m SimpleHTTPServer 8000"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "pixi.js": "^4.7.1",
+    "socket.io": "^2.1.0",
+    "webpack": "^4.4.1"
+  }
+}

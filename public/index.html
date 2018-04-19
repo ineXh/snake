@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<!--<script src="/socket.io/socket.io.js"></script>-->
+	<!--<script src="js/lib/socket.io-1.3.5.js"></script>-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.0.4/socket.io.js"></script>
+	<script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+</head>
+<body>
+	<h1>News:</h1>
+	<div id="news">
+	    Welcome
+	</div>
+	<br>
+	<form>
+	  Name:
+	  <input type="text" id="name">
+	</form>
+	<button onclick="joinGame()">Join Game</button>
+	
+	<h1>Player List:</h1>
+	<table id="playerlist" style=""></table>
+
+	<canvas id="gc" width="400" height="400">
+	<script src="js/game.js"></script>
+	<script src="js/main.js"></script>
+</body>
+</html>
