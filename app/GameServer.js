@@ -2,6 +2,7 @@ var Names = ['Amy', 'Bart', 'Bob', 'George', 'May', 'Mary', 'Michael', 'Nick',  
 var gameIDs = [0, 1, 2, 3, 4, 5];
 
 var Game = require('./Game.js');
+var ClientInfo = require('./ClientInfo.js');
 module.exports = exports = GameServer;
 function GameServer(io){
 	var server = this;
@@ -10,18 +11,9 @@ function GameServer(io){
 	this.io = io;
 
 	io.on('connection', function(socket){
-		var client = {
-			"Name": "",
-			"ID": -1,
-			"Online": true,
-			"GameID": -1
-		}
+		var client = new ClientInfo();
 		socket.on('join', onJoin.bind(server));
 		socket.on('disconnect', onDisconnect.bind(server));
-		socket.on('left', onLeft.bind(server));
-		socket.on('right', onRight.bind(server));
-		socket.on('up', onUp.bind(server));
-		socket.on('down', onDown.bind(server));
 
 		function onJoin(msg){
 			//console.log(msg)
@@ -39,11 +31,16 @@ function GameServer(io){
 	    	socket.broadcast.emit('news', client.Name + " has joined.");
 	    	sendplayerList();
 
-	    	var gameID = gameIDs.shift();
-	    	var newGame = Game(server, 'Game ' + gameID);
-	    	this.games.push(newGame);
-	    	newGame.join(client, socket);
-		}
+	    	game = this.findGame();
+	    	if(game == null){
+	    		var gameID = gameIDs.shift();
+		    	var newGame = new Game(server, 'Game ' + gameID);
+		    	this.games.push(newGame);
+		    	newGame.join(client, socket);
+	    	}else{
+	    		game.join(client, socket);
+	    	}
+		} // end onJoin
 		function onDisconnect(msg){
 			ID = client.ID;
 			//delete(playerList[ID]);
@@ -59,21 +56,25 @@ function GameServer(io){
 		    socket.broadcast.emit('news', client.Name + " has left.");
 		    sendplayerList();
 		}
+		/*function findGame(){
+			for(var i = 0; i < this.games.length; i++){
+				game = this.games[i];
+				if(game.isFull == false) return game;
+			}
+			return null;
+		}*/
 		function sendplayerList(){
 			io.local.emit('player list', playerList);
 		} // end sendplayerList
-		function onLeft(){
-
-		}
-		function onRight(){
-
-		}
-		function onUp(){
-
-		}
-		function onDown(){
-
-		}
 	}); // end connection
 	return this;
+}
+GameServer.prototype = {
+	findGame: function(){
+		for(var i = 0; i < this.games.length; i++){
+			game = this.games[i];
+			if(game.isFull == false) return game;
+		}
+		return null;
+	},
 }

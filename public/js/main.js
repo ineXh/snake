@@ -5,6 +5,7 @@ var getRandomInt = function(min, max) {
 var socket;
 var ID = getRandomInt(0, 10);
 var name;
+var connected = false;
 
 var join = function(){
 	console.log('join')
@@ -17,9 +18,27 @@ function joinGame() {
 }
 function onJoinGameSuccess(msg){
 	console.log(msg)
-	px = py = 5;
-	xv = yv = 0;
+	px = msg.px;
+	py = msg.py;
+	vx = vy = 0;
 	gameUpdate();
+}
+function onPlayerJoin(msg){
+	console.log('onPlayerJoin')
+	console.log(msg)
+}
+function leaveGame() {
+	console.log('leaveGame')
+	//socket.close();
+}
+function connectButton() {
+	if(connected){
+		$("#ConnectButton").text("Connect")
+		socket.close();
+		connected = false;
+	}else{
+		connect();
+	}
 }
 var onWelcome = function(msg){
 	name = msg;
@@ -34,13 +53,17 @@ var onPlayerList = function(msg){
 	removePlayerList();
 	list = msg;
 	for(i in list){
-		addPlayer(list[i].Name, list[i].Online)
+		addPlayer(list[i].Name, list[i].Online, list[i].GameID)
 	}
 }
 
-var addPlayer = function(name, online){
+var addPlayer = function(name, online, gameID){
+	if(gameID == -1) room = "Lobby"
+	else room = "Game " + gameID;
 	if(online)
-		$('#playerlist').append('<tr><td>' + name + '</td><td style="background-color:green;padding:10px"></td></tr>')
+		$('#playerlist').append('<tr><td>' + name + '</td>' +
+								'<td style="background-color:green;padding:10px"></td>' +
+								'<td>' + room + '</td></tr>')
 	else
 		$('#playerlist').append('<tr><td>' + name + '</td><td style="background-color:red;padding:10px"></td></tr>')
 }
@@ -52,19 +75,22 @@ var removePlayerList = function(){
 	}
 }
 
-
+function connect(){
+	socket = io.connect('http://localhost:5000/', {reconnection: false});
+	//socket = io.connect('https://ancient-cove-94904.herokuapp.com/', {reconnection: false});
+	connected = true;
+	$("#ConnectButton").text("Disconnect")
+	socket.on('welcome', onWelcome);
+	socket.on('news', onNews);
+	socket.on('player list', onPlayerList);
+	socket.on('joinGameSuccess', onJoinGameSuccess);
+	socket.on('player joins game', onPlayerJoin);
+}
 
 var Engine = (function(global) {
 	setTimeout(function(){
-		socket = io.connect('http://localhost:5000/', {reconnection: false});
-		//socket = io.connect('https://ancient-cove-94904.herokuapp.com/', {reconnection: false});
-
-		socket.on('welcome', onWelcome);
-		socket.on('news', onNews);
-		socket.on('player list', onPlayerList);
-		socket.on('joinGameSuccess', onJoinGameSuccess);
+		connect()
 	}, 1000);
-
 
 	fpsInterval = 1000 / fps;
     lastTime = Date.now();
