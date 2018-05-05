@@ -17,7 +17,7 @@ function GameServer(io){
 		socket.on('disconnect' , onDisconnect.bind(server));
 		socket.on('join game'  , onJoinGame.bind(server));
 		socket.on('leave game' , onLeaveGame.bind(server));
-		socket.on('changeDirection' , onchangeDirection.bind(server));
+		socket.on('changeDirection' , onChangeDirection.bind(server));
 
 		function onJoin(msg){
 			//console.log(msg)
@@ -70,8 +70,12 @@ function GameServer(io){
 			this.games[playerList[ID].GameID].leave(playerList[ID], socket);
 			playerList[ID].GameID = -1;
 		} // end onLeaveGame
-		function onchangeDirection(msg){
-			this.games[playerList[ID].GameID].onchangeDirection(player, msg);
+		function onChangeDirection(msg){
+			//console.log('playerList[ID].GameID ' + playerList[ID].GameID)
+			//console.log(this.games)
+			//console.log(this.games[playerList[ID].GameID])
+			var game = this.games[playerList[ID].GameID];
+			if(game != undefined) game.onChangeDirection(playerList[ID], msg);
 		}
 		function sendplayerList(){
 			io.local.emit('player list', playerList);

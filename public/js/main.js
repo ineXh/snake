@@ -5,7 +5,6 @@ var getRandomInt = function(min, max) {
 var socket = null;
 var ID = parseInt(sessionStorage.getItem('ID')); //getRandomInt(0, 10); //localStorage
 var name;
-var connected = false;
 var inGame = false;
 
 var connectButton = function() {
@@ -16,6 +15,7 @@ var connectButton = function() {
 	}else{
 		socket.close();
 		$("#ConnectServerButton").text("Connect")
+		inGame = false;
 		var form = document.getElementById("NameInput");
 	    form.style.display = "inline-table";
 		$("#JoinGameButton").hide()

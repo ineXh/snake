@@ -2,8 +2,8 @@ var updateTime = 100;
 var utils = require("./Utils.js");
 module.exports = exports = Game;
 function Game(server, ID){
-	this.server = server;
-	this.io = server.io;
+	//this.server = server;
+	//this.io = server.io;
 	this.ID = ID;
 	this.Name = 'Game ' + ID;
 	console.log(this.Name + ' created');

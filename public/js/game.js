@@ -25,19 +25,19 @@ function keyPush(evt){
 	switch(evt.keyCode){
 		case 37:
 			player.vx= -1; player.vy = 0;
-			if(socket != null) socket.emit('changeDirection', {vx: -1, vy: 0});
+			if(socket != null && inGame) socket.emit('changeDirection', {vx: -1, vy: 0});
 			break;
 		case 38:
 			player.vx= 0; player.vy = -1;
-			if(socket != null) socket.emit('changeDirection', {vx: 0, vy: -1});
+			if(socket != null && inGame) socket.emit('changeDirection', {vx: 0, vy: -1});
 			break;
 		case 39:
 			player.vx= 1; player.vy = 0;
-			if(socket != null) socket.emit('changeDirection', {vx: 1, vy: 0});
+			if(socket != null && inGame) socket.emit('changeDirection', {vx: 1, vy: 0});
 			break;
 		case 40:
 			player.vx= 0; player.vy = 1;
-			if(socket != null) socket.emit('changeDirection', {vx: 0, vy: 1});
+			if(socket != null && inGame) socket.emit('changeDirection', {vx: 0, vy: 1});
 			break;
 	}
 }
