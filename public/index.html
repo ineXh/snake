@@ -9,16 +9,15 @@
 <body>
 	<h1>News:</h1>
 	<div id="news">
-	    Welcome
+
 	</div>
 	<br>
-	<form>
+	<form id = "NameInput" style="display: inline-table;">
 	  Name:
-	  <input type="text" id="name">
+	  <input type="text" id="Name">
 	</form>
-	<button onclick="joinGame()">Join Game</button>
-	<button onclick="leaveGame()">Leave Game</button>
-	<button id = "ConnectButton" onclick="connectButton()">Disconnect</button>
+	<button id = "ConnectServerButton"  onclick="connectButton()">Connect</button>
+	<button id = "JoinGameButton" 		onclick="joinGame()" style="display: none;">Join Game</button>
 	<h1>Player List:</h1>
 	<table id="playerlist" style=""></table>
 

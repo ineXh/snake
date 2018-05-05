@@ -1,12 +1,12 @@
 module.exports = exports = ClientInfo;
 
-function ClientInfo(){
-    this.init();
+function ClientInfo(Name, ID){
+    this.init(Name, ID);
 } // end PlayerInfo
 ClientInfo.prototype = {
-    init: function(){
-    	this.Name = "";
-    	this.ID = -1;
+    init: function(Name, ID){
+    	this.Name = Name;
+    	this.ID = ID;
     	this.Online = true;
     	this.GameID = -1;
     	this.Socket = null; // can't do it

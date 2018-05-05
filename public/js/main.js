@@ -2,21 +2,75 @@ var getRandomInt = function(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 };
 
-var socket;
-var ID = getRandomInt(0, 10);
+var socket = null;
+var ID = parseInt(sessionStorage.getItem('ID')); //getRandomInt(0, 10); //localStorage
 var name;
 var connected = false;
+var inGame = false;
 
-var join = function(){
-	console.log('join')
-	socket.emit('join', ID);
+var connectButton = function() {
+	if(socket == null){
+		connect();
+	}else if(!socket.connected){
+		connect();
+	}else{
+		socket.close();
+		$("#ConnectServerButton").text("Connect")
+		var form = document.getElementById("NameInput");
+	    form.style.display = "inline-table";
+		$("#JoinGameButton").hide()
+	}
+} // end connectButton
+
+var connect = function(){
+	socket = io.connect('http://localhost:5000/', {reconnection: false});
+	//socket = io.connect('https://ancient-cove-94904.herokuapp.com/', {reconnection: false});
+	setTimeout( function(){
+		if(socket.connected){
+			setupConnection();
+			joinServer();
+		}else{
+			$("#news").text('Connection Timed Out! :(');
+			socket.io._reconnection =false;
+		}
+	}, 1000 );
+} // end connect
+
+var setupConnection = function(){
+	socket.on('joinServerSuccess', onJoinServerSuccess);
+	socket.on('news', onNews);
+	socket.on('player list', onPlayerList);
+	socket.on('joinGameSuccess', onJoinGameSuccess);
+	socket.on('player joins game', onPlayerJoin);
+}
+
+var joinServer = function(){
+	Name = document.getElementById("Name").value;
+    console.log(Name + ' joins server')
+    socket.emit('join server', {Name: Name, ID: ID});
+}
+var onJoinServerSuccess = function(msg){
+	Name = msg.Name;
+	ID = msg.ID;
+	sessionStorage.setItem('ID', ID);
+	$("#news").text("Welcome " + Name + ".");
+	$("#ConnectServerButton").text("Disconnect")
+	var form = document.getElementById("NameInput");
+    form.style.display = "none";
+	$("#JoinGameButton").show()
 }
 function joinGame() {
-    name = document.getElementById("name").value;
-    console.log(name + ' joins')
-    socket.emit('join', {name: name, ID: ID});
-}
+	if(inGame){
+		inGame = false;
+		$("#JoinGameButton").text("Join Game")
+		socket.emit('leave game');
+	}else{
+		socket.emit('join game');
+	}
+} // end joinGame
 function onJoinGameSuccess(msg){
+	inGame = true;
+	$("#JoinGameButton").text("Leave Game")
 	console.log(msg)
 	px = msg.px;
 	py = msg.py;
@@ -27,23 +81,7 @@ function onPlayerJoin(msg){
 	console.log('onPlayerJoin')
 	console.log(msg)
 }
-function leaveGame() {
-	console.log('leaveGame')
-	//socket.close();
-}
-function connectButton() {
-	if(connected){
-		$("#ConnectButton").text("Connect")
-		socket.close();
-		connected = false;
-	}else{
-		connect();
-	}
-}
-var onWelcome = function(msg){
-	name = msg;
-	$("#news").text("Welcome " + name + ".");
-}
+
 var onNews = function(msg){
 	$("#news").text(msg);
 }
@@ -75,21 +113,11 @@ var removePlayerList = function(){
 	}
 }
 
-function connect(){
-	socket = io.connect('http://localhost:5000/', {reconnection: false});
-	//socket = io.connect('https://ancient-cove-94904.herokuapp.com/', {reconnection: false});
-	connected = true;
-	$("#ConnectButton").text("Disconnect")
-	socket.on('welcome', onWelcome);
-	socket.on('news', onNews);
-	socket.on('player list', onPlayerList);
-	socket.on('joinGameSuccess', onJoinGameSuccess);
-	socket.on('player joins game', onPlayerJoin);
-}
+
 
 var Engine = (function(global) {
 	setTimeout(function(){
-		connect()
+
 	}, 1000);
 
 	fpsInterval = 1000 / fps;

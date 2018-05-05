@@ -1,11 +1,12 @@
 var updateTime = 100;
 var utils = require("./Utils.js");
 module.exports = exports = Game;
-function Game(server, name){
+function Game(server, ID){
 	this.server = server;
 	this.io = server.io;
-	this.name = name;
-	console.log(this.name + ' created');
+	this.ID = ID;
+	this.Name = 'Game ' + ID;
+	console.log(this.Name + ' created');
 	this.init();
 }
 Game.prototype = {
@@ -19,23 +20,24 @@ Game.prototype = {
 		this.players.push(player);
 		if(this.players.length >= 4) this.isFull = true;
 		this.playerSockets.push(socket);
-		console.log(player.Name + ' joins ' + this.name);
+		console.log(player.Name + ' joins ' + this.Name);
 		//socket.leave('Global Chat');
-		socket.join(this.name);
+		socket.join(this.Name);
 		var msg = {
-			room: this.name,
+			room: this.Name,
 			px: 5,
 			py: 5
 		}
 		socket.emit('joinGameSuccess', msg)
-		socket.to(this.name).emit('player joins game', msg);
-		//this.io.in(this.name).emit('player joins game', msg); // send to everyone in room
-		var onChangeDirection = this.onChangeDirection;
-		socket.on('changeDirection', onChangeDirection.bind(this, player));
+		socket.to(this.Name).emit('player joins game', msg);
+		//this.io.in(this.Name).emit('player joins game', msg); // send to everyone in room
+		//var onChangeDirection = this.onChangeDirection;
+		//socket.on('changeDirection', onChangeDirection.bind(this, player));
 		//socket.removeListener('changeDirection');
 	}, // end join
-	leave: function(){
-		socket.leave(this.name);
+	leave: function(player, socket){
+		console.log(player.Name + ' leaves ' + this.Name);
+		socket.leave(this.Name);
 	},
 	onChangeDirection: function(player, msg){
 		//console.log('onChangeDirection')

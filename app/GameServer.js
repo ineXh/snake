@@ -1,5 +1,6 @@
 var Names = ['Amy', 'Bart', 'Bob', 'George', 'May', 'Mary', 'Michael', 'Nick',  'Peter', 'Steve', 'Tony'];
-var gameIDs = [0, 1, 2, 3, 4, 5];
+var GameIDs = [0];
+var playerIDs = [0, 1, 2, 3, 4, 5];
 
 var Game = require('./Game.js');
 var ClientInfo = require('./ClientInfo.js');
@@ -7,42 +8,36 @@ module.exports = exports = GameServer;
 function GameServer(io){
 	var server = this;
 	var playerList = {};
-	this.games = [];
+	this.games = {};
 	this.io = io;
 
 	io.on('connection', function(socket){
-		var client = new ClientInfo();
-		socket.on('join', onJoin.bind(server));
-		socket.on('disconnect', onDisconnect.bind(server));
+		var ID = -1;
+		socket.on('join server', onJoin.bind(server));
+		socket.on('disconnect' , onDisconnect.bind(server));
+		socket.on('join game'  , onJoinGame.bind(server));
+		socket.on('leave game' , onLeaveGame.bind(server));
+		socket.on('changeDirection' , onchangeDirection.bind(server));
 
 		function onJoin(msg){
 			//console.log(msg)
-			//ID = this.playerIDs.shift();
-			ID = msg.ID;
-			name = msg.name;
 
-			client.Name = name;//Names[ID];
-			client.ID = ID;
-		    console.log(client.Name + ' has joined. ID: ' + ID);
-	    	if(playerList[ID] == undefined) playerList[ID] = client;
-	    	if(playerList[ID] != undefined) playerList[ID].Online = true;
+			ID = msg.ID != null ? msg.ID : playerIDs.shift();
+			Name = msg.Name;
 
-	    	socket.emit('welcome', client.Name);
-	    	socket.broadcast.emit('news', client.Name + " has joined.");
+		    console.log(Name + ' has joined. ID: ' + ID);
+	    	if(playerList[ID] == undefined) playerList[ID] = new ClientInfo(Name, ID);
+	    	if(playerList[ID] != undefined){
+	    		playerList[ID].Name = Name;
+	    		playerList[ID].Online = true;
+	    	}
+
+	    	socket.emit('joinServerSuccess', {Name: Name, ID: ID});
+	    	socket.broadcast.emit('news', Name + " has joined.");
 	    	sendplayerList();
 
-	    	game = this.findGame();
-	    	if(game == null){
-	    		var gameID = gameIDs.shift();
-		    	var newGame = new Game(server, 'Game ' + gameID);
-		    	this.games.push(newGame);
-		    	newGame.join(client, socket);
-	    	}else{
-	    		game.join(client, socket);
-	    	}
 		} // end onJoin
 		function onDisconnect(msg){
-			ID = client.ID;
 			//delete(playerList[ID]);
 			//this.playerIDs.push(ID);
 			if(playerList[ID] != undefined){
@@ -52,17 +47,32 @@ function GameServer(io){
 				console.log('ID: ' + ID)
 				console.log(playerList)
 			}
-		    console.log(client.Name + ' has Left.');
-		    socket.broadcast.emit('news', client.Name + " has left.");
+		    console.log(playerList[ID].Name + ' has Left.');
+		    socket.broadcast.emit('news', playerList[ID].Name + " has left.");
 		    sendplayerList();
 		}
-		/*function findGame(){
-			for(var i = 0; i < this.games.length; i++){
-				game = this.games[i];
-				if(game.isFull == false) return game;
-			}
-			return null;
-		}*/
+		function onJoinGame(msg){
+			game = this.findGame();
+	    	if(game == null){
+	    		var GameID = GameIDs.shift();
+	    		if(GameID == undefined) GameID = this.getLastGameID() + 1;
+		    	var newGame = new Game(server, GameID);
+		    	this.games[GameID] = newGame;
+		    	newGame.join(playerList[ID], socket);
+		    	playerList[ID].GameID = GameID;
+	    	}else{
+	    		game.join(playerList[ID], socket);
+	    		playerList[ID].GameID = game.ID;
+	    	}
+	    	sendplayerList();
+		} // end onJoinGame
+		function onLeaveGame(msg){
+			this.games[playerList[ID].GameID].leave(playerList[ID], socket);
+			playerList[ID].GameID = -1;
+		} // end onLeaveGame
+		function onchangeDirection(msg){
+			this.games[playerList[ID].GameID].onchangeDirection(player, msg);
+		}
 		function sendplayerList(){
 			io.local.emit('player list', playerList);
 		} // end sendplayerList
@@ -70,11 +80,19 @@ function GameServer(io){
 	return this;
 }
 GameServer.prototype = {
+	getLastGameID: function(){
+		var keys = Object.keys(this.games);
+		return parseInt(keys[keys.length-1]);
+	},
 	findGame: function(){
-		for(var i = 0; i < this.games.length; i++){
-			game = this.games[i];
+		for(GameID in this.games){
+			game = this.games[GameID]
 			if(game.isFull == false) return game;
 		}
+		/*for(var i = 0; i < this.games.length; i++){
+			game = this.games[i];
+			if(game.isFull == false) return game;
+		}*/
 		return null;
 	},
 }
