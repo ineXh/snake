@@ -1,15 +1,22 @@
-function Player(){
-    this.init();
+function Player(clr){
+    this.init(clr);
 } // end PlayerInfo
 Player.prototype = {
-    init: function(){
-    	this.px = this.py = 10;
-		this.vx = this.vy = 0;
+    init: function(clr){
 		this.trail = [];
-		this.tail = 5;
-		this.clr = "green";
+		this.clr = clr;
+		this.reset(10, 10);
+		this.dead = true;
+    },
+    reset: function(px, py){
+    	this.px = px
+    	this.py = py;
+    	this.trail.length = 0;
+    	this.tail = 5;
+    	this.vx = this.vy = 0;
     },
     update: function(){
+    	if(this.dead) return;
     	this.px += this.vx;
 		this.py += this.vy;
 		if(this.px < 0){
@@ -36,7 +43,7 @@ Player.prototype = {
 		while(this.trail.length > this.tail){
 			this.trail.shift();
 		}
-		if(ax == this.px && ay == this.py){
+		if(!inGame && ax == this.px && ay == this.py){
 			this.tail++;
 			ax = Math.floor(Math.random()*gridSize);
 			ay = Math.floor(Math.random()*gridSize);

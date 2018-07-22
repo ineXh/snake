@@ -1,6 +1,6 @@
 var Names = ['Amy', 'Bart', 'Bob', 'George', 'May', 'Mary', 'Michael', 'Nick',  'Peter', 'Steve', 'Tony'];
-var GameIDs = [0];
-var playerIDs = [0, 1, 2, 3, 4, 5];
+var gameIds = [0];
+var playerIds = [0, 1, 2, 3, 4, 5];
 
 var Game = require('./Game.js');
 var ClientInfo = require('./ClientInfo.js');
@@ -12,7 +12,7 @@ function GameServer(io){
 	this.io = io;
 
 	io.on('connection', function(socket){
-		var ID = -1;
+		var id = -1;
 		socket.on('join server', onJoin.bind(server));
 		socket.on('disconnect' , onDisconnect.bind(server));
 		socket.on('join game'  , onJoinGame.bind(server));
@@ -22,63 +22,74 @@ function GameServer(io){
 		function onJoin(msg){
 			//console.log(msg)
 
-			ID = msg.ID != null ? msg.ID : playerIDs.shift();
-			Name = msg.Name;
+			id = msg.id != null ? msg.id : playerIds.shift();
+			name = msg.name;
 
-		    console.log(Name + ' has joined. ID: ' + ID);
-	    	if(playerList[ID] == undefined) playerList[ID] = new ClientInfo(Name, ID);
-	    	if(playerList[ID] != undefined){
-	    		playerList[ID].Name = Name;
-	    		playerList[ID].Online = true;
+		    console.log(name + ' has joined. id: ' + id);
+	    	if(playerList[id] == undefined) playerList[id] = new ClientInfo(name, id);
+	    	if(playerList[id] != undefined){
+	    		playerList[id].serverInfo.name = name;
+	    		playerList[id].serverInfo.online = true;
 	    	}
 
-	    	socket.emit('joinServerSuccess', {Name: Name, ID: ID});
-	    	socket.broadcast.emit('news', Name + " has joined.");
+	    	socket.emit('joinServerSuccess', {name: name, id: id});
+	    	socket.broadcast.emit('news', name + " has joined.");
 	    	sendplayerList();
 
 		} // end onJoin
 		function onDisconnect(msg){
-			//delete(playerList[ID]);
-			//this.playerIDs.push(ID);
-			if(playerList[ID] != undefined){
-				playerList[ID].Online = false;
+			//delete(playerList[id]);
+			//this.playerIds.push(id);
+			//console.log('onDisconnect')
+			if(playerList[id] != undefined){
+				//console.log(this.games)
+				//console.log(playerList[id].serverInfo.gameId)
+				game = this.games[playerList[id].serverInfo.gameId]
+				if(game != undefined) game.leave(playerList[id], socket);
+				playerList[id].serverInfo.gameId = -1
+				playerList[id].serverInfo.online = false;
 			}else{
 				console.log('Error in onDisconnect')
-				console.log('ID: ' + ID)
+				console.log('id: ' + id)
 				console.log(playerList)
 			}
-		    console.log(playerList[ID].Name + ' has Left.');
-		    socket.broadcast.emit('news', playerList[ID].Name + " has left.");
+		    console.log(playerList[id].serverInfo.name + ' has Left.');
+		    socket.broadcast.emit('news', playerList[id].serverInfo.name + " has left.");
 		    sendplayerList();
 		}
 		function onJoinGame(msg){
 			game = this.findGame();
 	    	if(game == null){
-	    		var GameID = GameIDs.shift();
-	    		if(GameID == undefined) GameID = this.getLastGameID() + 1;
-		    	var newGame = new Game(server, GameID);
-		    	this.games[GameID] = newGame;
-		    	newGame.join(playerList[ID], socket);
-		    	playerList[ID].GameID = GameID;
+	    		var gameId = gameIds.shift();
+	    		if(gameId == undefined) gameId = this.getLastGameID() + 1;
+		    	var newGame = new Game(server, gameId);
+		    	this.games[gameId] = newGame;
+		    	newGame.join(playerList[id], socket);
+		    	playerList[id].serverInfo.gameId = gameId;
 	    	}else{
-	    		game.join(playerList[ID], socket);
-	    		playerList[ID].GameID = game.ID;
+	    		game.join(playerList[id], socket);
+	    		playerList[id].serverInfo.gameId = game.id;
 	    	}
 	    	sendplayerList();
 		} // end onJoinGame
 		function onLeaveGame(msg){
-			this.games[playerList[ID].GameID].leave(playerList[ID], socket);
-			playerList[ID].GameID = -1;
+			this.games[playerList[id].serverInfo.gameId].leave(playerList[id], socket);
+			playerList[id].serverInfo.gameId = -1;
+			sendplayerList();
 		} // end onLeaveGame
 		function onChangeDirection(msg){
-			//console.log('playerList[ID].GameID ' + playerList[ID].GameID)
+			//console.log('playerList[id].gameId ' + playerList[id].gameId)
 			//console.log(this.games)
-			//console.log(this.games[playerList[ID].GameID])
-			var game = this.games[playerList[ID].GameID];
-			if(game != undefined) game.onChangeDirection(playerList[ID], msg);
+			//console.log(this.games[playerList[id].gameId])
+			var game = this.games[playerList[id].serverInfo.gameId];
+			if(game != undefined) game.onChangeDirection(io, playerList[id], msg);
 		}
 		function sendplayerList(){
-			io.local.emit('player list', playerList);
+			var msg = {}
+			for(playerIndex in playerList){
+				msg[playerIndex] = playerList[playerIndex].serverInfo;
+			}
+			io.local.emit('player list', msg);
 		} // end sendplayerList
 	}); // end connection
 	return this;
@@ -89,8 +100,8 @@ GameServer.prototype = {
 		return parseInt(keys[keys.length-1]);
 	},
 	findGame: function(){
-		for(GameID in this.games){
-			game = this.games[GameID]
+		for(gameId in this.games){
+			game = this.games[gameId]
 			if(game.isFull == false) return game;
 		}
 		/*for(var i = 0; i < this.games.length; i++){
