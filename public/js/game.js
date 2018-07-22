@@ -1,12 +1,3 @@
-var fps = 15;
-var canv, ctx;
-var gridSize = 20;
-var player1;
-var player1Index = 0;
-var players = {};
-var playerPool = [];
-var ax = ay = 15;
-
 function gameSetup(){
 	canv = document.getElementById("gc");
 	ctx = canv.getContext("2d");

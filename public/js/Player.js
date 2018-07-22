@@ -32,21 +32,27 @@ Player.prototype = {
 			this.py = 0
 		}
 
-		ctx.fillStyle = this.clr;
-		for(var i = 0; i < this.trail.length; i++){
-			ctx.fillRect(this.trail[i].x*gridSize, this.trail[i].y*gridSize, gridSize-2, gridSize-2);
+		this.trail.push({x: this.px, y: this.py});
+
+		for(var i = 0; i < this.trail.length-1; i++){
 			if(this.trail[i].x == this.px && this.trail[i].y == this.py){
 				this.tail = 5;
 			}
 		}
-		this.trail.push({x: this.px, y: this.py});
-		while(this.trail.length > this.tail){
-			this.trail.shift();
-		}
+
+
 		if(!inGame && ax == this.px && ay == this.py){
 			this.tail++;
 			ax = Math.floor(Math.random()*gridSize);
 			ay = Math.floor(Math.random()*gridSize);
 		}
-    }
+		while(this.trail.length > this.tail){
+			this.trail.shift();
+		}
+
+		ctx.fillStyle = this.clr;
+		for(var i = 0; i < this.trail.length; i++){
+			ctx.fillRect(this.trail[i].x*gridSize, this.trail[i].y*gridSize, gridSize-2, gridSize-2);
+		}
+    } // end update
 }

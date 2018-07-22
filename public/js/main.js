@@ -183,10 +183,7 @@ var removePlayerList = function(){
 
 
 var Engine = (function(global) {
-	setTimeout(function(){
-
-	}, 1000);
-
+	//setTimeout(function(){}, 1000);
 	fpsInterval = 1000 / fps;
     lastTime = Date.now();
     startTime = lastTime;
@@ -198,8 +195,10 @@ function animate() {
     //if(gamestate != GameState.PauseGame) renderer.render(stage0);
     //if(gamestate != GameState.PauseGame) update();
     requestAnimationFrame( animate );
+    count++;
     now = Date.now();
     elapsed = now - lastTime;
+    $("#time").text('elapsed: ' + (elapsed/1000))
 
     if (elapsed > fpsInterval) {
         lastTime = now - (elapsed % fpsInterval);
