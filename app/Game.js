@@ -1,4 +1,5 @@
-var updateTime = 100;
+var colorList = ["lime", "yellow", "beige", "aqua"]
+var updateTime = 1000;
 var gridSize = 20;
 
 var utils = require("./Utils.js");

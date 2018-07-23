@@ -13,13 +13,13 @@ function GameServer(io){
 
 	io.on('connection', function(socket){
 		var id = -1;
-		socket.on('join server', onJoin.bind(server));
+		socket.on('join server', onJoinServer.bind(server));
 		socket.on('disconnect' , onDisconnect.bind(server));
 		socket.on('join game'  , onJoinGame.bind(server));
 		socket.on('leave game' , onLeaveGame.bind(server));
 		socket.on('changeDirection' , onChangeDirection.bind(server));
 
-		function onJoin(msg){
+		function onJoinServer(msg){
 			//console.log(msg)
 
 			id = msg.id != null ? msg.id : playerIds.shift();
@@ -36,7 +36,7 @@ function GameServer(io){
 	    	socket.broadcast.emit('news', name + " has joined.");
 	    	sendplayerList();
 
-		} // end onJoin
+		} // end onJoinServer
 		function onDisconnect(msg){
 			//delete(playerList[id]);
 			//this.playerIds.push(id);

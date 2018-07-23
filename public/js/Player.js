@@ -14,6 +14,7 @@ Player.prototype = {
     	this.trail.length = 0;
     	this.tail = 5;
     	this.vx = this.vy = 0;
+    	this.count = 0;
     },
     update: function(){
     	if(this.dead) return;
@@ -54,5 +55,6 @@ Player.prototype = {
 		for(var i = 0; i < this.trail.length; i++){
 			ctx.fillRect(this.trail[i].x*gridSize, this.trail[i].y*gridSize, gridSize-2, gridSize-2);
 		}
+		this.count++;
     } // end update
 }

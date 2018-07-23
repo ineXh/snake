@@ -83,6 +83,7 @@ function joinGame() {
 function onJoinGameSuccess(msg){
 	console.log('onJoinGameSuccess')
 	inGame = true;
+	count = 0;
 	$("#JoinGameButton").text("Leave Game")
 	console.log(msg)
 	player1Index = msg.playerIndex;
@@ -92,7 +93,7 @@ function onJoinGameSuccess(msg){
 	for(playerIndex in msg.players){
 		//if(parseInt(playerIndex) == player1Index) continue;
 		var player = playerPool.shift();
-		if(parseInt(playerIndex) == player1Index) player.clr = "green"
+		if(parseInt(playerIndex) == player1Index) player.clr = "lime"
 		px = player.px;
 		py = player.py;
 		player.px = msg.players[playerIndex].px;
@@ -154,10 +155,20 @@ var onPlayerChangeDirection = function(msg){
 	console.log(msg)
 	if(msg.playerIndex != player1Index){
 		player = players[msg.playerIndex];
+		if(player.px == msg.px && player.py == msg.py &&
+		  (player.vx != msg.vx || player.vy != msg.vy)) console.log('same pos, change dir')
+
+		if((player.px != msg.px || player.py != msg.py) &&
+		   (player.vx != msg.vx || player.vy != msg.vy)){
+			console.log('diff pos, change dir')
+			player.update();
+		}
 		player.px = msg.px;
 		player.py = msg.py;
 		player.vx = msg.vx;
 		player.vy = msg.vy;
+		player.trail[player.trail.length-1].x = player.px;
+		player.trail[player.trail.length-1].y = player.py;
 	}
 
 }
@@ -195,7 +206,7 @@ function animate() {
     //if(gamestate != GameState.PauseGame) renderer.render(stage0);
     //if(gamestate != GameState.PauseGame) update();
     requestAnimationFrame( animate );
-    count++;
+
     now = Date.now();
     elapsed = now - lastTime;
     $("#time").text('elapsed: ' + (elapsed/1000))
@@ -203,6 +214,7 @@ function animate() {
     if (elapsed > fpsInterval) {
         lastTime = now - (elapsed % fpsInterval);
         gameUpdate();
+        count++;
     }
 }
 

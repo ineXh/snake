@@ -2,10 +2,10 @@ function gameSetup(){
 	canv = document.getElementById("gc");
 	ctx = canv.getContext("2d");
 	document.addEventListener("keydown", keyPush);
-	player1 = new Player("green");
+	player1 = new Player("lime");
 	player1.dead = false;
 
-	for(var i = 0; i < 4; i++) playerPool.push(new Player("blue"))
+	for(var i = 0; i < 4; i++) playerPool.push(new Player("aqua"))
 
 	//setInterval(game, 1000/15)
 }
@@ -38,7 +38,7 @@ function keyPush(evt){
 			vx= -1; vy = 0;
 			player1.vx= vx; player1.vy = vy;
 			if(socket != null && inGame){
-				socket.emit('changeDirection', {px: px, py: py, vx: -1, vy: 0});
+				socket.emit('changeDirection', {px: px, py: py, vx: -1, vy: 0, count: count});
 				players[player1Index].vx = vx
 				players[player1Index].vy = vy
 			}
@@ -47,7 +47,7 @@ function keyPush(evt){
 			vx= 0; vy = -1;
 			player1.vx= vx; player1.vy = vy;
 			if(socket != null && inGame){
-				socket.emit('changeDirection', {px: px, py: py, vx: 0, vy: -1});
+				socket.emit('changeDirection', {px: px, py: py, vx: 0, vy: -1, count: count});
 				players[player1Index].vx = vx
 				players[player1Index].vy = vy
 			}
@@ -56,7 +56,7 @@ function keyPush(evt){
 			vx= 1; vy = 0;
 			player1.vx= vx; player1.vy = vy;
 			if(socket != null && inGame){
-				socket.emit('changeDirection', {px: px, py: py, vx: 1, vy: 0});
+				socket.emit('changeDirection', {px: px, py: py, vx: 1, vy: 0, count: count});
 				players[player1Index].vx = vx
 				players[player1Index].vy = vy
 			}
@@ -65,7 +65,7 @@ function keyPush(evt){
 			vx= 0; vy = 1;
 			player1.vx= vx; player1.vy = vy;
 			if(socket != null && inGame){
-				socket.emit('changeDirection', {px: px, py: py, vx: 0, vy: 1});
+				socket.emit('changeDirection', {px: px, py: py, vx: 0, vy: 1, count: count});
 				players[player1Index].vx = vx
 				players[player1Index].vy = vy
 			}

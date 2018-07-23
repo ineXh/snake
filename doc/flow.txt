@@ -1,0 +1,9 @@
+
+1.	Client connect
+2.	Client joinServer
+2b.	Server onJoinServer
+2c. Client onJoinServerSuccess
+3.	Client joinGame
+3b.	Server onJoinGame
+3b.	Client onJoinGameSuccess
+
